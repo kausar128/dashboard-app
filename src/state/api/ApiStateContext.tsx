@@ -1,40 +1,68 @@
-import { createContext, useContext, useRef, useState } from "react";
+import { createContext, useContext, useRef, useState, useCallback, useMemo, ReactNode } from "react";
 
-const SLA_MS = 60000;
+interface ApiStateContextType {
+  loading: boolean;
+  startRequest: () => void;
+  endRequest: () => void;
+}
 
-const ApiStateContext = createContext<any>(null);
+const SLA_MS = Number(import.meta.env.API_SLA_MS) || 5000;
 
-export const ApiStateProvider = ({ children }: { children: React.ReactNode }) => {
-  const [count, setCount] = useState(0);
+const ApiStateContext = createContext<ApiStateContextType | null>(null);
+
+export const ApiStateProvider = ({ children }: { children: ReactNode }) => {
+  const [requestCount, setRequestCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const timer = useRef<any>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const startRequest = () => {
-    setCount((c) => {
-      if (c === 0) {
+  const startRequest = useCallback(() => {
+    setRequestCount((prev) => {
+      if (prev === 0) {
         setLoading(true);
-        timer.current = setTimeout(() => setLoading(false), SLA_MS);
+        // Clear any existing timer just in case
+        if (timer.current) clearTimeout(timer.current);
+        
+        timer.current = setTimeout(() => {
+          console.warn("API SLA exceeded: disabling loading state");
+          setLoading(false);
+        }, SLA_MS);
       }
-      return c + 1;
+      return prev + 1;
     });
-  };
+  }, []);
 
-  const endRequest = () => {
-    setCount((c) => {
-      const next = Math.max(0, c - 1);
+  const endRequest = useCallback(() => {
+    setRequestCount((prev) => {
+      const next = Math.max(0, prev - 1);
       if (next === 0) {
-        clearTimeout(timer.current);
+        if (timer.current) {
+          clearTimeout(timer.current);
+          timer.current = null;
+        }
         setLoading(false);
       }
       return next;
     });
-  };
+  }, []);
+
+  // Memoize the value to prevent unnecessary re-renders of consumers
+  const value = useMemo(() => ({
+    loading,
+    startRequest,
+    endRequest
+  }), [loading, startRequest, endRequest]);
 
   return (
-    <ApiStateContext.Provider value={{ loading, startRequest, endRequest }}>
+    <ApiStateContext.Provider value={value}>
       {children}
     </ApiStateContext.Provider>
   );
 };
 
-export const useApiState = () => useContext(ApiStateContext);
+export const useApiState = () => {
+  const context = useContext(ApiStateContext);
+  if (!context) {
+    throw new Error("useApiState must be used within an ApiStateProvider");
+  }
+  return context;
+};

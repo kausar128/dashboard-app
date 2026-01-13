@@ -9,7 +9,7 @@ export const DashboardPage = () => {
   const [rowData, setRowData] = useState<any[]>([]);
 
   useEffect(() => {
-    api.get("/users").then((res) => setRowData(res.data));
+    api.get("/users/userlist").then((res) => setRowData(res.data));
   }, []);
 
   const columnDefs = useMemo<ColDef[]>(
@@ -28,7 +28,7 @@ export const DashboardPage = () => {
       </Typography>
 
       <Box
-        className="ag-theme-material"
+        // className="ag-theme-material"
         sx={{ height: 400, width: "100%" }}
       >
         <AgGridReact

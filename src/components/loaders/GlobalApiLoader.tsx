@@ -8,13 +8,11 @@ export const GlobalApiLoader = () => {
     <Backdrop 
       open={loading} 
       sx={{ 
-        zIndex: (theme) => theme.zIndex.drawer + 1,
-        color: '#fff' 
+        zIndex: (theme) => theme.zIndex.drawer + 1
       }}
     >
-      {/* Replacing motion.div with MUI's Fade transition */}
       <Fade in={loading} timeout={500} unmountOnExit>
-        <CircularProgress color="inherit" />
+        <CircularProgress/>
       </Fade>
     </Backdrop>
   );
