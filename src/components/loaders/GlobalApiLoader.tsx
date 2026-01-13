@@ -1,14 +1,21 @@
-import { Backdrop, CircularProgress } from "@mui/material";
-import { motion } from "framer-motion";
+import { Backdrop, CircularProgress, Fade } from "@mui/material";
 import { useApiState } from "../../state/api/ApiStateContext";
 
 export const GlobalApiLoader = () => {
   const { loading } = useApiState();
+
   return (
-    <Backdrop open={loading} sx={{ zIndex: 1300 }}>
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <CircularProgress />
-      </motion.div>
+    <Backdrop 
+      open={loading} 
+      sx={{ 
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        color: '#fff' 
+      }}
+    >
+      {/* Replacing motion.div with MUI's Fade transition */}
+      <Fade in={loading} timeout={500} unmountOnExit>
+        <CircularProgress color="inherit" />
+      </Fade>
     </Backdrop>
   );
 };
