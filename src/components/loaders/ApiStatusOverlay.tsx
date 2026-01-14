@@ -1,75 +1,65 @@
-import { Backdrop, CircularProgress, Fade, Box, Typography, Button, Paper } from "@mui/material";
-import { useEffect, useState } from "react";
-import { useApiState } from "../../state/api/ApiStateContext";
+import { 
+  Backdrop, 
+  CircularProgress, 
+  Fade, 
+  Typography, 
+  Button, 
+  Paper, 
+  Stack,
+  styled
+} from "@mui/material";
+import { useApiState } from "../../state/api/ApiStateContext";  
+
+const StyledNoticeBox = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(4),
+  maxWidth: 360,
+  width: '90%',
+  textAlign: 'center',
+  borderRadius: theme.shape.borderRadius * 2,
+  backgroundColor: theme.palette.background.paper,
+}));
 
 const ApiStatusOverlay = () => {
   const { loading, isTimedOut, resetApiState } = useApiState();
-  const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
-
-  // Logic to handle the 10-second visibility window for the SLA error
-  useEffect(() => {
-    let autoHideTimer: ReturnType<typeof setTimeout>;
-
-    if (isTimedOut) {
-      setShowTimeoutMessage(true);
-
-      // Auto-hide the entire overlay after 10 seconds if user doesn't click close
-      autoHideTimer = setTimeout(() => {
-        handleClose();
-      }, 10000);
-    }
-
-    return () => clearTimeout(autoHideTimer);
-  }, [isTimedOut]);
-
-  const handleClose = () => {
-    setShowTimeoutMessage(false);
-    resetApiState(); // Clears loading, requestCount, and isTimedOut in the Provider
-  };
 
   return (
     <Backdrop
-      // Backdrop stays open if we are actively loading OR showing the SLA message
-      open={loading || showTimeoutMessage}
+      open={loading || isTimedOut}
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        color: "#fff",
-        flexDirection: "column",
+        color: 'common.white',
+        flexDirection: 'column',
+        //enable blur and darken effect if desired
+        // backdropFilter: 'blur(2px)',
+        // backgroundColor: 'rgba(0, 0, 0, 0.5)',
       }}
     >
-      {/* 1. The Active Spinner */}
       <Fade in={loading} unmountOnExit>
         <CircularProgress color="inherit" />
       </Fade>
 
-      {/* 2. The Timeout Message Box */}
-      <Fade in={showTimeoutMessage} unmountOnExit>
-        <Paper 
-          elevation={6} 
-          sx={{ 
-            p: 4, 
-            maxWidth: 350, 
-            textAlign: "center",
-            borderRadius: 2 
-          }}
-        >
-          <Typography variant="h6" color="text.primary" gutterBottom sx={{ fontWeight: 'bold' }}>
-            Notice
-          </Typography>
-          
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            The request is taking longer than expected. You can stay on this page or try again later.
-          </Typography>
-          
-          <Button 
-            variant="contained" 
-            fullWidth
-            onClick={handleClose}
-            sx={{ textTransform: 'none' }}
-          >
-            Close
-          </Button>
-        </Paper>
+      <Fade in={isTimedOut} unmountOnExit>
+        <StyledNoticeBox elevation={12}>
+          <Stack spacing={2} alignItems="center">
+            <Typography variant="h6" color="text.primary" fontWeight="bold">
+              Notice
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary">
+              The request is taking longer than expected. You can stay on this page or try again later.
+            </Typography>
+
+            <Button
+              variant="contained"
+              fullWidth
+              size="large"
+              onClick={resetApiState}
+              sx={{ textTransform: 'none', fontWeight: 'bold' }}
+            >
+              Close
+            </Button>
+          </Stack>
+        </StyledNoticeBox>
       </Fade>
     </Backdrop>
   );
