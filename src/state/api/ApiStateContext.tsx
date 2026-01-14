@@ -2,8 +2,11 @@ import { createContext, useContext, useRef, useState, useCallback, useMemo, Reac
 
 interface ApiStateContextType {
   loading: boolean;
+  isTimedOut: boolean;
   startRequest: () => void;
   endRequest: () => void;
+  resetApiState: () => void;
+  requestCount: number;
 }
 
 // Timeout duration from environment variables or default to 5s
@@ -15,6 +18,7 @@ export const ApiStateProvider = ({ children }: { children: ReactNode }) => {
   // requestCount tracks how many APIs are currently in-flight
   const [requestCount, setRequestCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [isTimedOut, setIsTimedOut] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Clears the safety timer to prevent it from firing unnecessarily
@@ -36,15 +40,16 @@ export const ApiStateProvider = ({ children }: { children: ReactNode }) => {
       // If prev is 0, this is the first request starting, so show the loader
       if (prev === 0) {
         setLoading(true);
+        setIsTimedOut(false); // Reset timeout state when a new batch starts
         clearSlaTimer();
         
-        // Safety timer: hides loader if API takes too long
+        // start timer for SLA on very first request, hides loader if API takes too long
         timer.current = setTimeout(() => {
           console.warn("API SLA exceeded: disabling loading state");
           setLoading(false);
+          setIsTimedOut(true);
         }, SLA_MS);
       }
-      // Increment the count (e.g., 0 becomes 1, 1 becomes 2)
       return prev + 1;
     });
   }, [clearSlaTimer]);
@@ -59,18 +64,28 @@ export const ApiStateProvider = ({ children }: { children: ReactNode }) => {
       if (next === 0) {
         clearSlaTimer();
         setLoading(false);
+        setIsTimedOut(false);
       }
       // Update the state to the new count
       return next;
     });
   }, [clearSlaTimer]);
 
-  // Memoize the context object so consumers don't re-render unless values change
+  const resetApiState = useCallback(() => {
+    setRequestCount(0);
+    setLoading(false);
+    setIsTimedOut(false);
+    clearSlaTimer();
+  }, [clearSlaTimer]);
+
   const value = useMemo(() => ({
     loading,
+    requestCount,
+    isTimedOut,
     startRequest,
-    endRequest
-  }), [loading, startRequest, endRequest]);
+    endRequest,
+    resetApiState
+  }), [loading, requestCount, isTimedOut, startRequest, endRequest, resetApiState]);
 
   return (
     <ApiStateContext.Provider value={value}>
