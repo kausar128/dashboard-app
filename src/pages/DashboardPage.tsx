@@ -28,7 +28,7 @@ export const DashboardPage = () => {
       </Typography>
 
       <Box
-        // className="ag-theme-material"
+        className="ag-theme-material"
         sx={{ height: 400, width: "100%" }}
       >
         <AgGridReact
