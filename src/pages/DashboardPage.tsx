@@ -3,6 +3,7 @@ import { Typography, Box } from "@mui/material";
 import { AgGridReact } from "ag-grid-react";
 import { ColDef } from "ag-grid-community";
 import { useApiClient } from "../api/ApiClientProvider";
+import {ThemeShowcasePage} from "./ThemeShowcasePage";
 
 export const DashboardPage = () => {
   const api = useApiClient();
@@ -38,6 +39,7 @@ export const DashboardPage = () => {
           paginationPageSize={5}
         />
       </Box>
+      <ThemeShowcasePage />
     </>
   );
 };

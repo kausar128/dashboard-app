@@ -3,11 +3,17 @@ import { useApiState } from "../../state/api/ApiStateContext";
 import { borderTokens } from "../../theme/tokens/borders";
 
 const StyledNoticeBox = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
+  // 1. Spacing from MUI's default scale (8px * 4 = 32px)
+  padding: theme.spacing(4), 
+  
+  // 2. Accessing your custom border tokens via the theme
+  borderTop: `${theme.customBorders.width.accent} solid ${theme.palette.error.main}`,
+  
+  // 3. Accessing custom component tokens via the theme
+  borderRadius: theme.customComponents.card.borderRadius, 
+  
   maxWidth: 400,
   textAlign: 'center',
-  // Generic Brand Accent using the primary color
-  borderTop: `${borderTokens.width.accent} solid ${theme.palette.primary.main}`,
 }));
 
 const ApiStatusOverlay = () => {
