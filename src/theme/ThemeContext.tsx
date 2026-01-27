@@ -1,17 +1,22 @@
-import { createContext, useContext, useMemo, useState, ReactNode } from 'react';
+import { createContext, useContext, useMemo, useState, ReactNode, useEffect } from 'react';
 import { ThemeProvider, PaletteMode, CssBaseline } from '@mui/material';
 import { getCustomTheme } from './index';
 
 const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
 export const CustomThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [mode, setMode] = useState<PaletteMode>('light');
+  const [mode, setMode] = useState<PaletteMode>(() => {
+    return (localStorage.getItem('theme-pref') as PaletteMode) || 'light';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('theme-pref', mode);
+  }, [mode]);
 
   const colorMode = useMemo(() => ({
     toggleColorMode: () => setMode((prev) => (prev === 'light' ? 'dark' : 'light')),
   }), []);
 
-  // createTheme is called here
   const theme = useMemo(() => getCustomTheme(mode), [mode]);
 
   return (

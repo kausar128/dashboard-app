@@ -6,6 +6,7 @@ import {
   Box,
 } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+import { ThemeToggle } from "./ThemeToggle";
 
 export const TopNavBar = () => {
   const { pathname } = useLocation();
@@ -35,6 +36,7 @@ export const TopNavBar = () => {
           >
             Dashboard
           </Button>
+          <ThemeToggle />
         </Box>
       </Toolbar>
     </AppBar>

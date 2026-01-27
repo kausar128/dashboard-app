@@ -11,7 +11,7 @@ export const typographyTokens = {
       h2: '2rem',        // 32px
       h6: '1.25rem',     // 20px
       body1: '1rem',     // 16px
-      body2: '0.875rem', // 14px (often used for data tables)
+      body2: '0.875rem', // 14px
       caption: '0.75rem', // 12px
     }
   };
