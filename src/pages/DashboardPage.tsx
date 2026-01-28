@@ -4,6 +4,7 @@ import { AgGridReact } from "ag-grid-react";
 import { ColDef } from "ag-grid-community";
 import { useApiClient } from "../api/ApiClientProvider";
 import {ThemeShowcasePage} from "./ThemeShowcasePage";
+import { ActionRequiredCard } from "../components/Notification/ActionRequiredCard";
 
 export const DashboardPage = () => {
   const api = useApiClient();
@@ -24,6 +25,8 @@ export const DashboardPage = () => {
 
   return (
     <>
+      
+      <ActionRequiredCard />
       <Typography variant="h5" gutterBottom>
         Users
       </Typography>
